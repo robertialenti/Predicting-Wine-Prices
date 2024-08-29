@@ -165,12 +165,14 @@ df['sentiment'] = df['description'].progress_apply(analyze_sentiment)
 
 
 #%% Make and Evaluate Predictions
+# Define Function for Selecting Relevant Features
 def select_features(data):
     data = data[["points", "vintage", "sentiment", "designation", "country", "province", "region_1", "winery", "variety", "price"]]
     data = data.dropna()
     return data
 
 
+# Define Function for Parametrizing Models
 def parametrize_models(X_train, y_train):
     # Define Parameter Grid
     param_grids = {
@@ -204,10 +206,10 @@ def parametrize_models(X_train, y_train):
     # Perform Cross-Validation to Optimize Parameters for All Other Models
     for model_name, model in [
         ("K-Nearest Neighbors", KNeighborsRegressor()),
-        ("Random Forest", RandomForestRegressor(random_state=1)),
-        ("XGBoost", XGBRegressor(random_state=1)),
-        ("Lasso", Lasso(max_iter=10000)),
-        ("LightGBM", LGBMRegressor(random_state=1)),
+        ("Random Forest", RandomForestRegressor(random_state = 1)),
+        ("XGBoost", XGBRegressor(random_state = 1)),
+        ("Lasso", Lasso(max_iter = 10000)),
+        ("LightGBM", LGBMRegressor(random_state = 1)),
     ]:
         grid_search = GridSearchCV(model, 
                                    param_grids[model_name], 
@@ -223,6 +225,7 @@ def parametrize_models(X_train, y_train):
     return models
         
 
+# Define Funtion for Making Predictions
 def make_predictions(data, target, test_size):
     # Time for Prediction
     start_time = time.time()
@@ -243,11 +246,11 @@ def make_predictions(data, target, test_size):
     X_train, y_train = train.drop(target, axis = 1), train[target]
     X_test, y_test = test.drop(target, axis = 1), test[target]
     
-    # Create Empty List to Hold Evaluation Results
-    results = []
-    
     # Parametrize Models
     models = parametrize_models(X_train, y_train)
+    
+    # Create Empty List to Hold Evaluation Results
+    results = []
     
     # Define Empty Dictionary for Feature Importance
     feature_importances = {}
@@ -268,6 +271,10 @@ def make_predictions(data, target, test_size):
             "R2": r2
             })
         
+        # Collect Feature Importance for Models That Provide Them
+        if hasattr(model, 'feature_importances_'):
+            feature_importances[model_name] = model.feature_importances_
+        
     # Evaluate Rule-of-Thumb Model
     thumb_predictions = test.copy()
     thumb_predictions['predicted_price'] = thumb_predictions.groupby(['points'])['price'].transform('mean')
@@ -287,7 +294,8 @@ def make_predictions(data, target, test_size):
     # Plot Feature Importances
     if feature_importances:
         for model_name, importances in feature_importances.items():
-            plt.barh(X_train.columns, importances, color='blue')
+            sorted_idx = importances.argsort()
+            plt.barh(X_train.columns[sorted_idx], importances[sorted_idx])
             plt.xlabel('Importance')
             plt.ylabel('Feature')
             plt.title(f'Feature Importances for {model_name}')
