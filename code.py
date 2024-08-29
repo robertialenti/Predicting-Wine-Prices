@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import time
 import warnings
+import json
 
 # Figures
 import matplotlib as mpl
@@ -41,7 +42,7 @@ filepath = "C:/Users/rialenti/OneDrive - Harvard Business School/Desktop/Work/Ot
 
 #%% Section 2: Data
 # Import Data
-df = pd.read_csv(filepath + "data.csv")
+df = pd.read_csv(filepath + "data/data.csv")
 
 # Remove Duplicate Reviews
 df = df.drop_duplicates(subset=['description'])
@@ -64,7 +65,7 @@ for variable in ["country", "designation", "province", "region_1", "region_2", "
     df[variable] = pd.Categorical(df[variable])
 
 #%% Exploratory Analysis
-# 1. Number of Wines by Grape Variety
+# 1. Variety Distribution
 df_plot = df
 variety_counts = df_plot['variety'].value_counts(dropna=False)
 df_plot['variety_grouped'] = df_plot['variety'].apply(lambda x: x if variety_counts[x] >= 1000 else 'Other')
@@ -82,6 +83,7 @@ plt.grid(False)
 plt.ylabel("Grape Variety")
 plt.xlabel("Frequency")
 plt.title("Number of Wines by Grape Variety")
+plt.savefig(filepath + "figures/variety_distribution.png", bbox_inches = "tight")
 plt.show()
 
 # 2. Country Distribution
@@ -104,6 +106,7 @@ plt.xticks(rotation=90)
 plt.ylabel("Country")
 plt.xlabel("Frequency")
 plt.title("Country Distribution")
+plt.savefig(filepath + "figures/country_distribution.png", bbox_inches = "tight")
 plt.show()
 
 # 3. Vintage Distribution
@@ -118,6 +121,7 @@ plt.xticks(rotation=90)
 plt.ylabel("Frequency")
 plt.xlabel("Vintage")
 plt.title("Vintage Distribution")
+plt.savefig(filepath + "figures/vintage_distribution.png", bbox_inches = "tight")
 plt.show()
 
 # 4. Price Distribution
@@ -128,6 +132,7 @@ plt.grid(False)
 plt.ylabel("Frequency")
 plt.xlabel("Log(Price)")
 plt.title("Price Distribution")
+plt.savefig(filepath + "figures/price_distribution.png", bbox_inches = "tight")
 plt.show()
 
 # 5. Relationship Between Price and Points
@@ -153,6 +158,7 @@ cbar.ax.set_title('Vintage', pad=15, fontsize=12)
 cbar.ax.yaxis.set_label_position('right')
 cbar.ax.yaxis.set_ticks_position('right')
 cbar.ax.set_ylabel('', rotation=0)
+plt.savefig(filepath + "figures/price_points.png", bbox_inches = "tight")
 plt.show()
 
 
@@ -255,7 +261,7 @@ def make_predictions(data, target, test_size):
     # Define Empty Dictionary for Feature Importance
     feature_importances = {}
     
-    # Train and Evaluate Each Machine Learning Model
+    # Train, Test, and Evaluate Each Machine Learning Model
     for model_name, model in models.items():
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
@@ -274,8 +280,17 @@ def make_predictions(data, target, test_size):
         # Collect Feature Importance for Models That Provide Them
         if hasattr(model, 'feature_importances_'):
             feature_importances[model_name] = model.feature_importances_
+            
+        # Plot Predicted vs Actual Prices
+        plt.scatter(y_test, y_pred, alpha=0.5)
+        plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=2)
+        plt.xlabel('Actual Price')
+        plt.ylabel('Predicted Price')
+        plt.title(f'Predicted vs Actual Prices for {model_name}')
+        plt.savefig(filepath + f"output/predicted_actual_{model_name}.png", bbox_inches = "tight")
+        plt.show()
         
-    # Evaluate Rule-of-Thumb Model
+    # Test and Evaluate Rule-of-Thumb Model
     thumb_predictions = test.copy()
     thumb_predictions['predicted_price'] = thumb_predictions.groupby(['points'])['price'].transform('mean')
     
@@ -299,7 +314,12 @@ def make_predictions(data, target, test_size):
             plt.xlabel('Importance')
             plt.ylabel('Feature')
             plt.title(f'Feature Importances for {model_name}')
+            plt.savefig(filepath + f"output/feature_importance_{model_name}.png", bbox_inches = "tight")
             plt.show()
+            
+    # Save Model Performance
+    with open(filepath + 'output/model_performance.json', 'w') as f:
+        json.dump(results, f, indent = 4)
     
     # Return Models and Results
     end_time = time.time()
