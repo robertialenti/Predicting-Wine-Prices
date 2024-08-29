@@ -40,7 +40,7 @@ pd.set_option("display.expand_frame_repr", False)
 filepath = "C:/Users/rialenti/OneDrive - Harvard Business School/Desktop/Work/Other/Wine/"
 
 
-#%% Section 2: Data
+#%% Section 2: Importing and Preparing Data
 # Import Data
 df = pd.read_csv(filepath + "data/data.csv")
 
@@ -162,7 +162,7 @@ plt.savefig(filepath + "figures/price_points.png", bbox_inches = "tight")
 plt.show()
 
 
-#%% Natural Language Processing
+#%% Section 4: Natural Language Processing
 def analyze_sentiment(text):
     return TextBlob(text).sentiment.polarity
 
@@ -170,7 +170,7 @@ tqdm.pandas()
 df['sentiment'] = df['description'].progress_apply(analyze_sentiment)
 
 
-#%% Make and Evaluate Predictions
+#%% Section 5: Make and Evaluate Predictions
 # Define Function for Selecting Relevant Features
 def select_features(data):
     data = data[["points", "vintage", "sentiment", "designation", "country", "province", "region_1", "winery", "variety", "price"]]
