@@ -20,7 +20,11 @@ plt.rcParams["legend.fontsize"] = 18
 plt.rc("savefig", dpi = 300)
 sns.set_theme(style = "ticks", font_scale = 1, font = "DejaVu Sans")
 
-# Natural Language Processing
+# Text Analytics
+import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
+from collections import Counter
 from textblob import TextBlob
 
 # Machine Learning
@@ -52,9 +56,8 @@ df = df.drop(['taster_twitter_handle', 'taster_name'], axis=1)
 
 # Create Vintage Variable
 df['vintage'] = df['title'].str.extract(r'(\b\d{4}\b)', expand=False)
-df['vintage'] = pd.to_numeric(df['vintage'], errors='coerce')
+df['vintage'] = pd.to_numeric(df['vintage'], errors='coerce').astype(int)
 df = df.dropna(subset=['vintage'])
-df["vintage"] = df["vintage"].astype(int)
 
 # Remove Wines with Implausible Price
 df = df[df["price"] > 0]
@@ -68,25 +71,64 @@ for variable in ["country", "province", "region_1", "region_2", "winery", "desig
     df[variable] = pd.Categorical(df[variable])
     
     
-#%% Section 4: Natural Language Processing
-# Option 1
+#%% Section 4: Text Analysis
+# Define Function for Extracting Sentiment from Reviews
 def analyze_sentiment(text):
     return TextBlob(text).sentiment.polarity
 
+
+# Extract Sentiment from Reviews
 tqdm.pandas()
 df['sentiment'] = df['description'].progress_apply(analyze_sentiment)
 
+# Define Function for Extracting Terms with Most Predictive Power
+def find_top_correlated_words(df, text_column, price_column, top_n_words, top_n_correlated):
+    # Create List of Stop Words
+    stop_words = set(stopwords.words('english'))
+    
+    # Preprocess Text and Exclude Stop Words
+    df[text_column] = df[text_column].str.lower().str.replace('[^\w\s]', '', regex=True)
+    df[text_column] = df[text_column].apply(lambda x: ' '.join([word for word in x.split() if word not in stop_words]))
 
-# Option 2
-from transformers import pipeline
-sentiment_analyzer = pipeline('sentiment-analysis')
+    # Detect Most Common Terms
+    all_words = ' '.join(df[text_column].dropna()).split()
+    common_words = [word for word, count in Counter(all_words).most_common(top_n_words)]
+    print(common_words)
 
-def analyze_sentiment_transformers(text):
-    result = sentiment_analyzer(text)[0]
-    return result['score'] if result['label'] == 'POSITIVE' else -result['score']
+    # Create Indicator for Each Term
+    for word in common_words:
+        df[f'contains_{word}'] = df[text_column].apply(lambda x: 1 if word in x.split() else 0)
 
-df['sentiment'] = df['description'].progress_apply(analyze_sentiment_transformers)
+    # # Correlate Each Indicator Variable for Each Term
+    correlations = {}
+    for word in common_words:
+        corr = df[f'contains_{word}'].corr(df[price_column])
+        correlations[word] = corr
 
+    # Select Terms with Highest Correlation with Price
+    sorted_correlations = sorted(correlations.items(), key=lambda item: abs(item[1]), reverse=True)
+    top_correlated_words = sorted_correlations[:top_n_correlated]
+
+    # Convert List of Common Terms to DataFrame
+    top_correlated_df = pd.DataFrame(top_correlated_words, columns=['Word', 'Correlation'])
+
+    # Return Highest Correlated Words
+    return top_correlated_df
+
+
+# Define Functon for ___
+def add_top_words_indicators(df, text_column, top_words_df):
+    top_words = top_words_df['Word'].tolist()
+
+    # Create indicator variables for the top correlated words
+    for word in top_words:
+        df[f'contains_{word}'] = df[text_column].apply(lambda x: 1 if word in x.split() else 0)
+
+    return df
+
+
+top_words_df = find_top_correlated_words(df, text_column='description', price_column='price', top_n_words=100, top_n_correlated=10)
+df = add_top_words_indicators(df, text_column='description', top_words_df=top_words_df)
 
 #%% Exploratory Analysis
 # 1. Variety Distribution
@@ -213,15 +255,18 @@ plt.show()
 
 df_plot = df
 corr_matrix = df_plot[["price", "points", "vintage", "sentiment"]].corr()
-plt.figure(figsize=(10, 8))
 sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
 plt.title('Correlation Matrix')
 plt.show()
 
+
 #%% Section 5: Make and Evaluate Predictions
 # Define Function for Selecting Relevant Features
 def select_features(data):
-    data = data[["points", "vintage", "sentiment", "designation", "country", "province", "region_1", "winery", "variety", "price"]]
+    cols = ["points", "vintage", "sentiment", "designation", "country", "province", "region_1", "winery", "variety", "price"]
+    indicator_cols = [col for col in data.columns if "contains" in col]
+    cols.extend(indicator_cols)
+    data = data[cols]
     data = data.dropna()
     return data
 
@@ -316,13 +361,11 @@ def make_predictions(data, target, test_size):
         
         mae = mean_absolute_error(y_test, y_pred)
         mape = mean_absolute_percentage_error(y_test, y_pred)*100
-        r2 = r2_score(y_test, y_pred)
         
         results.append({
             "Model": model_name,
             "MAE": mae, 
-            "MAPE": mape,
-            "R2": r2
+            "MAPE": mape
             })
         
         # Collect Feature Importance for Models That Provide Them
@@ -344,17 +387,15 @@ def make_predictions(data, target, test_size):
     
     mae = mean_absolute_error(y_test, thumb_predictions['predicted_price'])
     mape = mean_absolute_percentage_error(y_test, thumb_predictions['predicted_price'])*100
-    r2 = r2_score(y_test, thumb_predictions['predicted_price'])
     
     results.append({
         "Model": "Rule-of-Thumb",
         "MAE": mae,
-        "MAPE": mape,
-        "R2": r2
+        "MAPE": mape
     })
         
     
-    # Plot Feature Importances
+    # Plot Feature Importance by Model
     if feature_importances:
         for model_name, importances in feature_importances.items():
             sorted_idx = importances.argsort()
@@ -378,4 +419,3 @@ def make_predictions(data, target, test_size):
 
 # Make Predictions
 models, results = make_predictions(df, "price", 0.20)
-
