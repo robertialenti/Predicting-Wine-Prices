@@ -42,7 +42,7 @@ filepath = "C:/Users/rialenti/OneDrive - Harvard Business School/Desktop/Work/Ot
 
 #%% Section 2: Importing and Preparing Data
 # Import Data
-df = pd.read_csv(filepath + "data/data.csv")
+df = pd.read_csv('data/data.csv', usecols=lambda column: not column.startswith('Unnamed'))
 
 # Remove Duplicate Reviews
 df = df.drop_duplicates(subset=['description'])
@@ -56,13 +56,37 @@ df['vintage'] = pd.to_numeric(df['vintage'], errors='coerce')
 df = df.dropna(subset=['vintage'])
 df["vintage"] = df["vintage"].astype(int)
 
-# Filter Data
+# Remove Wines with Implausible Price
+df = df[df["price"] > 0]
+
+# Remove Poorly Populated Vintages
 df = df[df["vintage"] >= 1990]
 df = df[df["vintage"] <= 2016]
 
 # Convert String Variables to Categorical Variable
-for variable in ["country", "designation", "province", "region_1", "region_2", "winery", "variety"]:
+for variable in ["country", "province", "region_1", "region_2", "winery", "designation", "variety"]:
     df[variable] = pd.Categorical(df[variable])
+    
+    
+#%% Section 4: Natural Language Processing
+# Option 1
+def analyze_sentiment(text):
+    return TextBlob(text).sentiment.polarity
+
+tqdm.pandas()
+df['sentiment'] = df['description'].progress_apply(analyze_sentiment)
+
+
+# Option 2
+from transformers import pipeline
+sentiment_analyzer = pipeline('sentiment-analysis')
+
+def analyze_sentiment_transformers(text):
+    result = sentiment_analyzer(text)[0]
+    return result['score'] if result['label'] == 'POSITIVE' else -result['score']
+
+df['sentiment'] = df['description'].progress_apply(analyze_sentiment_transformers)
+
 
 #%% Exploratory Analysis
 # 1. Variety Distribution
@@ -150,7 +174,7 @@ sns.scatterplot(
 norm = plt.Normalize(df_plot['vintage'].min(), df_plot['vintage'].max())
 sm = plt.cm.ScalarMappable(cmap="viridis", norm=norm)
 plt.xlabel('Points')
-plt.ylabel('Price')
+plt.ylabel('Price ($)')
 plt.title('Price vs Points, Colored by Vintage')
 cbar = plt.colorbar(sm)
 cbar.set_label('Vintage', labelpad=10, fontsize=12)
@@ -158,17 +182,41 @@ cbar.ax.set_title('Vintage', pad=15, fontsize=12)
 cbar.ax.yaxis.set_label_position('right')
 cbar.ax.yaxis.set_ticks_position('right')
 cbar.ax.set_ylabel('', rotation=0)
-plt.savefig(filepath + "figures/price_points.png", bbox_inches = "tight")
+plt.savefig(filepath + "figures/price_points_vintage.png", bbox_inches = "tight")
+plt.show()
+
+# 6. Relationship Between Price and Points
+df_plot = df
+sns.scatterplot(
+    data=df_plot, 
+    x='points', 
+    y='price', 
+    hue='sentiment', 
+    palette='viridis',
+    legend=None
+)
+
+norm = plt.Normalize(df_plot['sentiment'].min(), df_plot['sentiment'].max())
+sm = plt.cm.ScalarMappable(cmap="viridis_r", norm=norm)
+plt.xlabel('Points')
+plt.ylabel('Price ($)')
+plt.title('Price vs Points, Colored by Sentiment')
+cbar = plt.colorbar(sm)
+cbar.set_label('Sentiment', labelpad=10, fontsize=12)
+cbar.ax.set_title('Sentiment', pad=15, fontsize=12)
+cbar.ax.yaxis.set_label_position('right')
+cbar.ax.yaxis.set_ticks_position('right')
+cbar.ax.set_ylabel('', rotation=0)
+plt.savefig(filepath + "figures/price_points_sentiment.png", bbox_inches = "tight")
 plt.show()
 
 
-#%% Section 4: Natural Language Processing
-def analyze_sentiment(text):
-    return TextBlob(text).sentiment.polarity
-
-tqdm.pandas()
-df['sentiment'] = df['description'].progress_apply(analyze_sentiment)
-
+df_plot = df
+corr_matrix = df_plot[["price", "points", "vintage", "sentiment"]].corr()
+plt.figure(figsize=(10, 8))
+sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
+plt.title('Correlation Matrix')
+plt.show()
 
 #%% Section 5: Make and Evaluate Predictions
 # Define Function for Selecting Relevant Features
@@ -284,8 +332,8 @@ def make_predictions(data, target, test_size):
         # Plot Predicted vs Actual Prices
         plt.scatter(y_test, y_pred, alpha=0.5)
         plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=2)
-        plt.xlabel('Actual Price')
-        plt.ylabel('Predicted Price')
+        plt.xlabel('Actual Price ($)')
+        plt.ylabel('Predicted Price ($)')
         plt.title(f'Predicted vs Actual Prices for {model_name}')
         plt.savefig(filepath + f"output/predicted_actual_{model_name}.png", bbox_inches = "tight")
         plt.show()
@@ -330,5 +378,4 @@ def make_predictions(data, target, test_size):
 
 # Make Predictions
 models, results = make_predictions(df, "price", 0.20)
-    
-    
+
