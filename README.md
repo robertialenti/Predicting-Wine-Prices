@@ -36,19 +36,19 @@ In this section, I visualize some of the data's features to get a better sense o
 
 First, I plot the country of origin. Most of the wines in the dataset were produced in the United States.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/country_distribution.png" width="500" height="300">
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/country_distribution.png" width="500" height="400">
 
 Next, I plot the distribution of grape variety. Consistent with global production, pinot noir, chardonnay, and cabernet sauvignon are the most common grape varieties. However, a large number of wines are formed from less common blends.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/variety_distribution.png" width="500" height="300">
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/variety_distribution.png" width="500" height="400">
 
 Finally, I plot the distribution of vintage. Most of the wines in the dataset were produceed from grapes harvested around 2010. Given that data was gathered in 2017, most of the wines in the dataset are not young wines - which are consumed within 1-2 years of bottling - but rather wines that have already aged for several years.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/vintage_distribution.png" width="500" height="300">
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/vintage_distribution.png" width="500" height="400">
 
 To get a better sense of how quantitative variables are related with price, I construct a correlation matrix.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/correlation_matrix.png" width="500" height="300">
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/correlation_matrix.png" width="500" height="400">
 
 I find that wine price to be left-skewed, with most wines having prices clustered around the mean and relatively fewer wines having much higher prices. As a result, I choose to apply a logarithmic transform, which helps make the distribution of price more normal. I use the logged price as the target variable in prediction.
 
@@ -76,7 +76,7 @@ The naive model, which makes only unconditional predictions, is found to perform
 
 In addition, I plot actual and predicted log price values for the 6 machine learning models.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/output/predicted_actual_combined.png" width="500" height="300">
+<img src="https://github.com/robertialenti/Wine/raw/main/output/predicted_actual_combined.png" width="500" height="400">
 
 Finally, I examine feature importance for models that provide this information. As expected, Wine Enthusiasts' points are generally good predictors of price. A wine's grape country and region of interest, as well as its grape blend are also consistently strong predictors. The sommelier's reviews are comparatively less strong predictors.
 
