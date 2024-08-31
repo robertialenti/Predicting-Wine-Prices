@@ -39,11 +39,17 @@ First, I plot the country of origin. Most of the wines in the dataset were produ
 
 <img src="https://github.com/robertialenti/Wine/raw/main/figures/country_distribution.png" width="425" height="250">
 
-Next, I plot the distribution of grape variety. Consistent with global production, ____.
+Next, I plot the distribution of grape variety. Consistent with global production, pinot noir, chardonnay, and cabernet sauvignon are the most common grape varieties. However, a large number of wines are formed from less common blends.
 
 <img src="https://github.com/robertialenti/Wine/raw/main/figures/variety_distribution.png" width="425" height="250">
 
-I find that wine price is ___. As a result, I choose to apply a logarithmic transform, and predict the logged variable in prediction.
+Finally, I plot the distribution of vintage. Most of the wines in the dataset were produceed from grapes harvested around 2010. Given that data was gathered in 2017, most of the wines in the dataset are not young wines - which are consumed within 1-2 years of bottling - but rather wines that have already aged for several years.
+
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/vintage_distribution.png" width="425" height="250">
+
+Given that 
+
+I find that wine price to be left-skewed, with most wines priced near the mean and relatively few wines with much higher prices. As a result, I choose to apply a logarithmic transform, which helps the distribution of price more normal and reduce the ___. I use the logged price variable in prediction.
 
 ### 5. Prediction
 In this section, I select relevant features, create training and testing sets, parametrize the machine learning models with k-fold cross-validation, make out-of-sample predictions, and compare performance to a naive model.
