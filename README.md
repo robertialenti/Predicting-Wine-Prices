@@ -1,5 +1,5 @@
 # Predicting Wine Prices
-This project aims to predict prices for a selection of wines reviewed by sommeliers. I compare the performance of naive and linear regression models to a number of commonly used machine learning techniques including lasso regression, K-nearest neighbors, random forest, and two gradient-boosted decision trees (XGBoost and LightGBM).
+This project aims to predict prices for a selection of wines reviewed by sommeliers. I compare the performance of a naive model to a linear regression model, as well as to a number of commonly used machine learning techniques including lasso regression, K-nearest neighbors, random forest, and two gradient-boosted decision trees (XGBoost and LightGBM).
 
 ## Data
 The data was scraped by [Zach Thoutt](https://github.com/zackthoutt/wine-deep-learning) in 2017 from [Wine Enthusiast](https://www.wineenthusiast.com/?s=&search_type=shop). The raw dataset includes nearly 150,000 reviews. For each wine, we have information about its production, its country and region of origin, a review written written by a professional sommelier, the score assigned to it by Wine Enthusiast, as well as its price in US dollars.
