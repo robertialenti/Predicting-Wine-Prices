@@ -60,7 +60,7 @@ I create the training dataset by selecting a random sample of the processed data
 In addition to a naive model, which simply assumes that a wine's price is equal to the average price, I train and use 6 additional models: linear regression, lasso regression, K-nearest neighbors, random forest, and gradient-boosted decision trees (XGBoost and LightGBM). The predictive performance, expressed in terms of mean absolute error (MAE) and mean absolute percentage error (MAPE) is shown below:
 
 
-The naive model, which makes only unconditional predictions, is found to perform the worse. In comparison, the gradient-boosted decision trees are found to perform best. In particular, the XGBoost and LightGBM models are found to record MAPEs of just 7.81% and 8.11%, respectivey. That is, these models make predictions that are, on average, 8% away from a wine's actual log(price). XGBoost remains the best performing model if price, rather than log(price), is used as an outcome. However, the model's MAPE rises to nearly 30% in this case.
+The naive model, which makes only unconditional predictions, is found to perform the worse. In comparison, the gradient-boosted decision trees are found to perform best. In particular, the XGBoost and LightGBM models are found to record MAPEs of just 7.81% and 8.11%, respectivey. That is, these models make predictions that are, on average, 8% away from a wine's actual log(price), which is more than twice as accurate as the naive model! XGBoost remains the best performing model if price, rather than log(price), is used as an outcome. However, the model's MAPE rises to nearly 30% when predicting the untransformed price variable.
 
 | Model | MAE | MAPE (%) |
 | ----- | --- | -------- |
