@@ -36,7 +36,7 @@ In this section, I visualize some of the data's features to get a better sense o
 
 First, I plot the country of origin. Most of the wines in the dataset were produced in the United States.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/country_distribution.png" width="425" height="250">
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/country_distribution.png" width="1000" height="600">
 
 Next, I plot the distribution of grape variety. Consistent with global production, pinot noir, chardonnay, and cabernet sauvignon are the most common grape varieties. However, a large number of wines are formed from less common blends.
 
