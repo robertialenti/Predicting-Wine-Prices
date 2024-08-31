@@ -74,7 +74,7 @@ The naive model, which makes only unconditional predictions, is found to perform
 
 In addition, I plot actual and predicted log price values for the 6 machine learning models.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/predicted_actual_combined.png" width="425" height="250">
+<img src="https://github.com/robertialenti/Wine/raw/main/output/predicted_actual_combined.png" width="425" height="250">
 
 Finally, I examine feature importance for models that produce these statitics.
 
