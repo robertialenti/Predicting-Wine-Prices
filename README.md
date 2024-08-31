@@ -11,7 +11,7 @@ The code is separated into 5 sections. To run the code without modification, I s
 I begin by importing widely used libraries for data analysis, machine learning, and natural language processing. 
 
 ### 2. Importing and Cleaning Data
-After reading in the data, I create a new variable, `vintage` by parsing the vintage year from the `title` variable. I then subset the data, focusing only on vintages between 1990 and 2016 - which comprise nearly the entirety of the dataset. I retain only wines with strictly positive prices. I also interpolate missing values of `region_1` by using the mode ____. Finally, I remove unneeded variables, or variables that I deem to have little predictive power.
+After reading in the data, I create a new variable, `vintage` by parsing the vintage year from the `title` variable. I then subset the data, focusing only on vintages between 1990 and 2016 - which comprise nearly the entirety of the dataset. I retain only wines with strictly positive prices. I also interpolate missing values of `region_1` by using the designation-specific modal value. Finally, I remove unneeded variables, or variables that I deem to have little predictive power.
 
 The processed dataset includes just over 107,000 observations. Variables include:
 
@@ -48,7 +48,7 @@ Finally, I plot the distribution of vintage. Most of the wines in the dataset we
 
 Given that 
 
-I find that wine price to be left-skewed, with most wines priced near the mean and relatively few wines with much higher prices. As a result, I choose to apply a logarithmic transform, which helps the distribution of price more normal and reduce the ___. I use the logged price variable in prediction.
+I find that wine price to be left-skewed, with most wines having prices clustered around the mean and relatively fewer wines having much higher prices. As a result, I choose to apply a logarithmic transform, which helps make the distribution of price more normal. I use the logged price as the target variable in prediction.
 
 ### 5. Prediction
 In this section, I select relevant features, create training and testing sets, parametrize the machine learning models with k-fold cross-validation, make out-of-sample predictions, and compare performance to a naive model.
@@ -60,7 +60,7 @@ I create the training dataset by selecting a random sample of the processed data
 In addition to a naive model, which simply assumes that a wine's price is equal to the average price, I train and use 6 additional models: linear regression, lasso regression, K-nearest neighbors, random forest, and gradient-boosted decision trees (XGBoost and LightGBM). The predictive performance, expressed in terms of mean absolute error (MAE) and mean absolute percentage error (MAPE) is shown below:
 
 
-The naive model, which makes only unconditional predictions, is found to perform the worse. In comparison, the gradient-boosted decision trees are found to perform best. In particular, the XGBoost and LightGBM models are found to record MAPEs of just 7.81% and 8.11%, respectivey. That is, these models make predictions that are, on average, 8% away from a wine's actual log(price). XGBoost remains the best performing model if price, rather than log(prce), is used as an outcome. However, the model's MAPE in this case is nearer to 30%.
+The naive model, which makes only unconditional predictions, is found to perform the worse. In comparison, the gradient-boosted decision trees are found to perform best. In particular, the XGBoost and LightGBM models are found to record MAPEs of just 7.81% and 8.11%, respectivey. That is, these models make predictions that are, on average, 8% away from a wine's actual log(price). XGBoost remains the best performing model if price, rather than log(price), is used as an outcome. However, the model's MAPE rises to nearly 30% in this case.
 
 | Model | MAE | MAPE (%) |
 | ----- | --- | -------- |
