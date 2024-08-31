@@ -60,17 +60,17 @@ I create the training dataset by selecting a random sample of the processed data
 In addition to a naive model, which simply assumes that a wine's price is equal to the average price, I train and use 6 additional models: linear regression, lasso regression, K-nearest neighbors, random forest, and gradient-boosted decision trees (XGBoost and LightGBM). The predictive performance, expressed in terms of mean absolute error (MAE) and mean absolute percentage error (MAPE) is shown below:
 
 
-The naive model, which makes only unconditional predictions, is found to perform the worse. In comparison, the gradient-boosted decision trees are found to perform best, recording MAPE of around 30%. That is, these models make predictions that are, on average, 30% away from a wine's actual price.
+The naive model, which makes only unconditional predictions, is found to perform the worse. In comparison, the gradient-boosted decision trees are found to perform best, recording MAPE of around 30%. That is, these models make predictions that are, on average, 8% away from a wine's actual log(price). XGBoost remains the best performing model if price, rather than log(prce), is used as an outcome. However, the model's MAPE in this case is nearer to 30%.
 
-| Model | Price - MAE | Price - MAPE | Log(Price) - MAE | Log(Price) - MAPE |
+| Model | MAE | MAPE
 | ---- | ---- | ------------ | -------- | --------- |
-| Naive | 2018-04-23 17:47 | Métro Vendôme (de Marlowe / de Maisonneuve) | 45.4744 | -73.604 |
-| Linear Regression | 2018-04-23 18:00 | Métro Vendôme (de Marlowe / de Maisonneuve) | 45.4744 | -73.604 |
-| Lasso Regression | 2018-04-23 18:03 | Métro Vendôme (de Marlowe / de Maisonneuve) | 45.4744 | -73.604 |
-| K-Nearest Neighbors | 2019-06-10 17:45 | Métro Vendôme (de Marlowe / de Maisonneuve) | 45.4739 | -73.6047 |
-| Random Forest | 2019-06-10 17:49 | Métro Vendôme (de Marlowe / de Maisonneuve) | 45.4739 | -73.6047 | 
-| XGBoost | 2019-06-10 17:50 | Métro Vendôme (de Marlowe / de Maisonneuve) | 45.4739 | -73.6047 |
-| LightGBM | 2019-06-10 17:50 | Métro Vendôme (de Marlowe / de Maisonneuve) | 45.4739 | -73.6047 |
+| Naive | 2018-04-23 17:47 | Métro Vendôme (de Marlowe / de Maisonneuve) |
+| Linear Regression | 2018-04-23 18:00 | Métro Vendôme (de Marlowe / de Maisonneuve) | 
+| Lasso Regression | 2018-04-23 18:03 | Métro Vendôme (de Marlowe / de Maisonneuve) | 
+| K-Nearest Neighbors | 2019-06-10 17:45 | Métro Vendôme (de Marlowe / de Maisonneuve) | 
+| Random Forest | 2019-06-10 17:49 | Métro Vendôme (de Marlowe / de Maisonneuve) | 
+| XGBoost | 2019-06-10 17:50 | Métro Vendôme (de Marlowe / de Maisonneuve) | 
+| LightGBM | 2019-06-10 17:50 | Métro Vendôme (de Marlowe / de Maisonneuve) | 
 
 In addition, I plot actual and predicted log price values for the 6 machine learning models.
 
