@@ -470,8 +470,8 @@ def make_predictions(data):
                                                                            test_size = 0.20)
     
     # Parameterize Models
-    #models = parameterize_models(X_train, 
-    #                             y_train)
+    models = parameterize_models(X_train, 
+                                 y_train)
     
     # Obtain Results
     results, plots = train_test_evaluate(models, 
