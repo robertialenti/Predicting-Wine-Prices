@@ -60,17 +60,17 @@ I create the training dataset by selecting a random sample of the processed data
 In addition to a naive model, which simply assumes that a wine's price is equal to the average price, I train and use 6 additional models: linear regression, lasso regression, K-nearest neighbors, random forest, and gradient-boosted decision trees (XGBoost and LightGBM). The predictive performance, expressed in terms of mean absolute error (MAE) and mean absolute percentage error (MAPE) is shown below:
 
 
-The naive model, which makes only unconditional predictions, is found to perform the worse. In comparison, the gradient-boosted decision trees are found to perform best. In particular, the XGBoost and LightGBM models are found to record MAPEs of just 7.81% and 8.11%, respectivey. That is, these models make predictions that are, on average, 8% away from a wine's actual log(price), which is more than twice as accurate as the naive model! XGBoost remains the best performing model if price, rather than log(price), is used as an outcome. However, the model's MAPE rises to nearly 30% when predicting the untransformed price variable.
+The naive model, which makes only unconditional predictions, is found to perform the worse. In comparison, the gradient-boosted decision trees are found to perform best. In particular, the XGBoost and LightGBM models are found to record MAPEs of just 7.81% and 8.11%, respectivey. That is, these models make predictions that are, on average, 8% away from a wine's actual log(price), which is more than twice as accurate as the naive model. XGBoost remains the best performing model if price, rather than log(price), is used as an outcome. However, the model's MAPE rises to nearly 30% when predicting the untransformed price variable.
 
-| Model | MAE | MAPE (%) |
-| ----- | --- | -------- |
-| Naive | 0.53 | 16.30 |
-| Linear Regression | 0.38 | 11.50 | 
-| Lasso Regression | 0.38 | 11.69 |
-| K-Nearest Neighbors | 0.35 | 10.69 |
-| Random Forest | 0.28 | 8.45 |
-| XGBoost | 0.26 | 7.81 |
-| LightGBM | 0.27 | 8.11 |
+| Model | MAE | MAPE (%) | MAPE, Relative to Naive |
+| ----- | --- | -------- | ----------------------- |
+| Naive | 0.53 | 16.30 | 1 |
+| Linear Regression | 0.38 | 11.50 | 0.71 |
+| Lasso Regression | 0.38 | 11.69 | 0.72 |
+| K-Nearest Neighbors | 0.35 | 10.69 | 0.66 |
+| Random Forest | 0.28 | 8.45 | 0.52 |
+| XGBoost | 0.26 | 7.81 | 0.48 |
+| LightGBM | 0.27 | 8.11 | 0.50 |
 
 In addition, I plot actual and predicted log price values for the 6 machine learning models.
 
