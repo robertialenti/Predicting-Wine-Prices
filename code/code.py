@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 import time
 import warnings
-import json
 
 # Figures
 import matplotlib as mpl
@@ -25,7 +24,8 @@ import nltk
 nltk.download('stopwords')
 from nltk.corpus import stopwords
 from collections import Counter
-from textblob import TextBlob
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+analyzer = SentimentIntensityAnalyzer()
 
 # Machine Learning
 from sklearn.linear_model import LinearRegression, Lasso
@@ -34,7 +34,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
-from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, r2_score
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 
 # Other
 warnings.filterwarnings("ignore", category=FutureWarning, message="The frame.append method is deprecated and will be removed from pandas in a future version. Use pandas.concat instead.")
@@ -46,43 +46,70 @@ filepath = "C:/Users/rialenti/OneDrive - Harvard Business School/Desktop/Work/Ot
 
 #%% Section 2: Importing and Preparing Data
 # Import Data
-df = pd.read_csv('data/data.csv', usecols=lambda column: not column.startswith('Unnamed'))
+df = pd.read_csv(filepath + 'data/data.csv', usecols=lambda column: not column.startswith('Unnamed'))
 
-# Remove Duplicate Reviews
-df = df.drop_duplicates(subset=['description'])
+# Define Function for Cleaning Data
+def clean_data(data):
+    # Remove Duplicate Reviews
+    data = data.drop_duplicates(subset=['description'])
+    
+    # Drop Unwanted Variables
+    data = data.drop(['taster_twitter_handle', 'taster_name', 'region_2'], axis=1)
+    
+    # Remove Wines with Implausible Price
+    data = data[data["price"] > 0]
+    
+    # Create Log(Price) Variable
+    data["log_price"] = np.log(data["price"])
+    
+    # Create Vintage Variable
+    data['vintage'] = data['title'].str.extract(r'(\b\d{4}\b)', expand=False)
+    data['vintage'] = pd.to_numeric(data['vintage'], errors='coerce')
+    data = data.dropna(subset=['vintage'])
+    data["vintage"] = data["vintage"].astype(int)
+    
+    # Remove Poorly Populated Vintages
+    data = data[data["vintage"] >= 1990]
+    data = data[data["vintage"] <= 2016]
+    
+    # Replace Missing Region With Modal Region for Same Designation
+    def replace_with_mode(data, group_col, target_col):
+        data[group_col].fillna('Unknown', inplace=True)
+        
+        # Calculate mode of target_col for each group in group_col
+        mode_region = data.groupby(group_col)[target_col].agg(lambda x: x.mode().iloc[0] if not x.mode().empty else None)
+        
+        # Function to replace NaNs in target_col with mode of group
+        def fill_na(row):
+            if pd.isna(row[target_col]):
+                return mode_region.get(row[group_col], row[target_col])
+            return row[target_col]
+        
+        # Apply the function to replace NaNs
+        data[target_col] = data.apply(fill_na, axis=1)
+    
+    replace_with_mode(data, 'designation', 'region_1')
+    
+    # Return Clean Data
+    return data
 
-# Drop Unwanted Variables
-df = df.drop(['taster_twitter_handle', 'taster_name'], axis=1)
 
-# Create Vintage Variable
-df['vintage'] = df['title'].str.extract(r'(\b\d{4}\b)', expand=False)
-df['vintage'] = pd.to_numeric(df['vintage'], errors='coerce').astype(int)
-df = df.dropna(subset=['vintage'])
-
-# Remove Wines with Implausible Price
-df = df[df["price"] > 0]
-
-# Remove Poorly Populated Vintages
-df = df[df["vintage"] >= 1990]
-df = df[df["vintage"] <= 2016]
-
-# Convert String Variables to Categorical Variable
-for variable in ["country", "province", "region_1", "region_2", "winery", "designation", "variety"]:
-    df[variable] = pd.Categorical(df[variable])
+df = clean_data(df)
     
     
 #%% Section 4: Text Analysis
 # Define Function for Extracting Sentiment from Reviews
-def analyze_sentiment(text):
-    return TextBlob(text).sentiment.polarity
+def get_sentiment_vader(text):
+    sentiment_dict = analyzer.polarity_scores(text)
+    return sentiment_dict['compound']
 
 
-# Extract Sentiment from Reviews
+# Assuming df is your DataFrame with wine reviews
 tqdm.pandas()
-df['sentiment'] = df['description'].progress_apply(analyze_sentiment)
+df['sentiment'] = df['description'].progress_apply(get_sentiment_vader)
 
 # Define Function for Extracting Terms with Most Predictive Power
-def find_top_correlated_words(df, text_column, price_column, top_n_words, top_n_correlated):
+def find_top_correlated_words(df, text_column, target_column, top_n_words, top_n_correlated):
     # Create List of Stop Words
     stop_words = set(stopwords.words('english'))
     
@@ -93,17 +120,15 @@ def find_top_correlated_words(df, text_column, price_column, top_n_words, top_n_
     # Detect Most Common Terms
     all_words = ' '.join(df[text_column].dropna()).split()
     common_words = [word for word, count in Counter(all_words).most_common(top_n_words)]
-    print(common_words)
 
-    # Create Indicator for Each Term
-    for word in common_words:
-        df[f'contains_{word}'] = df[text_column].apply(lambda x: 1 if word in x.split() else 0)
+    # Create a dictionary to store temporary columns
+    temp_columns = {}
 
-    # # Correlate Each Indicator Variable for Each Term
+    # Correlate Each Indicator Variable for Each Term (store in temp_columns)
     correlations = {}
     for word in common_words:
-        corr = df[f'contains_{word}'].corr(df[price_column])
-        correlations[word] = corr
+        temp_columns[f'contains_{word}'] = df[text_column].apply(lambda x: 1 if word in x.split() else 0)
+        correlations[word] = pd.Series(temp_columns[f'contains_{word}']).corr(df[target_column])
 
     # Select Terms with Highest Correlation with Price
     sorted_correlations = sorted(correlations.items(), key=lambda item: abs(item[1]), reverse=True)
@@ -112,23 +137,23 @@ def find_top_correlated_words(df, text_column, price_column, top_n_words, top_n_
     # Convert List of Common Terms to DataFrame
     top_correlated_df = pd.DataFrame(top_correlated_words, columns=['Word', 'Correlation'])
 
-    # Return Highest Correlated Words
-    return top_correlated_df
+    # Only keep columns for the top correlated words
+    top_columns = {f'contains_{word}': temp_columns[f'contains_{word}'] for word, _ in top_correlated_words}
+
+    # Concatenate these columns to the original DataFrame
+    df = pd.concat([df, pd.DataFrame(top_columns)], axis=1)
+
+    # Return the DataFrame and the top correlated words
+    return top_correlated_df, df
 
 
-# Define Functon for ___
-def add_top_words_indicators(df, text_column, top_words_df):
-    top_words = top_words_df['Word'].tolist()
+# Usage
+top_words_df, df = find_top_correlated_words(df, 
+                                             text_column='description', 
+                                             target_column='log_price', 
+                                             top_n_words=100, 
+                                             top_n_correlated=10)
 
-    # Create indicator variables for the top correlated words
-    for word in top_words:
-        df[f'contains_{word}'] = df[text_column].apply(lambda x: 1 if word in x.split() else 0)
-
-    return df
-
-
-top_words_df = find_top_correlated_words(df, text_column='description', price_column='price', top_n_words=100, top_n_correlated=10)
-df = add_top_words_indicators(df, text_column='description', top_words_df=top_words_df)
 
 #%% Exploratory Analysis
 # 1. Variety Distribution
@@ -190,18 +215,7 @@ plt.title("Vintage Distribution")
 plt.savefig(filepath + "figures/vintage_distribution.png", bbox_inches = "tight")
 plt.show()
 
-# 4. Price Distribution
-df_plot = df
-df_plot["log_price"] = np.log(df_plot["price"])
-plt.hist(df_plot['log_price'], bins=10, edgecolor='black')
-plt.grid(False)
-plt.ylabel("Frequency")
-plt.xlabel("Log(Price)")
-plt.title("Price Distribution")
-plt.savefig(filepath + "figures/price_distribution.png", bbox_inches = "tight")
-plt.show()
-
-# 5. Relationship Between Price and Points
+# 4. Relationship Between Price and Points
 df_plot = df
 df_plot["vintage"] = df_plot["vintage"].astype(int)
 sns.scatterplot(
@@ -227,34 +241,9 @@ cbar.ax.set_ylabel('', rotation=0)
 plt.savefig(filepath + "figures/price_points_vintage.png", bbox_inches = "tight")
 plt.show()
 
-# 6. Relationship Between Price and Points
+# Correlation Matrix
 df_plot = df
-sns.scatterplot(
-    data=df_plot, 
-    x='points', 
-    y='price', 
-    hue='sentiment', 
-    palette='viridis',
-    legend=None
-)
-
-norm = plt.Normalize(df_plot['sentiment'].min(), df_plot['sentiment'].max())
-sm = plt.cm.ScalarMappable(cmap="viridis_r", norm=norm)
-plt.xlabel('Points')
-plt.ylabel('Price ($)')
-plt.title('Price vs Points, Colored by Sentiment')
-cbar = plt.colorbar(sm)
-cbar.set_label('Sentiment', labelpad=10, fontsize=12)
-cbar.ax.set_title('Sentiment', pad=15, fontsize=12)
-cbar.ax.yaxis.set_label_position('right')
-cbar.ax.yaxis.set_ticks_position('right')
-cbar.ax.set_ylabel('', rotation=0)
-plt.savefig(filepath + "figures/price_points_sentiment.png", bbox_inches = "tight")
-plt.show()
-
-
-df_plot = df
-corr_matrix = df_plot[["price", "points", "vintage", "sentiment"]].corr()
+corr_matrix = df_plot.corr()
 sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
 plt.title('Correlation Matrix')
 plt.show()
@@ -263,12 +252,42 @@ plt.show()
 #%% Section 5: Make and Evaluate Predictions
 # Define Function for Selecting Relevant Features
 def select_features(data):
-    cols = ["points", "vintage", "sentiment", "designation", "country", "province", "region_1", "winery", "variety", "price"]
-    indicator_cols = [col for col in data.columns if "contains" in col]
-    cols.extend(indicator_cols)
-    data = data[cols]
+    # Specify Relevant Features to Include
+    cols_keep = ["points", "vintage", "sentiment", "designation", "country", "province", "region_1", "winery", "variety", "log_price"] + \
+           [col for col in data.columns if "contains" in col]
+
+    # Select Relevant Features
+    data = data[cols_keep]
+    
+    # Drop Observations with Missing Values
     data = data.dropna()
+    
+    # Encode Categorical Variables
+    cols_categoical = ["designation", "country", "province", "region_1", "winery", "variety"]
+    for col in cols_categoical:
+        data[col] = pd.Categorical(data[col])
+        data[col] = data[col].cat.codes
+    
+    # Return Data with Relevant Features
+    print("Features selected.")
     return data
+
+
+# Define Function for Creating Training and Testing Sets
+def create_train_test_sets(data, target_column, test_size):
+    # Create Training and Testing Subsamples
+    split_index = int(len(data) * (1 - test_size))
+    data = data.sample(frac = 1, random_state = 1).reset_index(drop=True)
+    
+    train = data.iloc[:split_index]
+    test = data.iloc[split_index:]
+    
+    X_train, y_train = train.drop(target_column, axis = 1), train[target_column]
+    X_test, y_test = test.drop(target_column, axis = 1), test[target_column]
+    
+    # Return Training and Testing Sets
+    print("Training and test sets created.")
+    return train, test, X_train, y_train, X_test, y_test
 
 
 # Define Function for Parametrizing Models
@@ -276,7 +295,7 @@ def parametrize_models(X_train, y_train):
     # Define Parameter Grid
     param_grids = {
         "K-Nearest Neighbors": {
-            "n_neighbors": [3, 5, 7, 9]
+            "n_neighbors": [3, 5, 7, 9, 12]
         },
         "Random Forest": {
             "n_estimators": [50, 100, 200],
@@ -308,7 +327,7 @@ def parametrize_models(X_train, y_train):
         ("Random Forest", RandomForestRegressor(random_state = 1)),
         ("XGBoost", XGBRegressor(random_state = 1)),
         ("Lasso", Lasso(max_iter = 10000)),
-        ("LightGBM", LGBMRegressor(random_state = 1)),
+        ("LightGBM", LGBMRegressor(random_state = 1, force_col_wise = True)),
     ]:
         grid_search = GridSearchCV(model, 
                                    param_grids[model_name], 
@@ -321,33 +340,12 @@ def parametrize_models(X_train, y_train):
         print(f"Best parameters for {model_name}: {grid_search.best_params_}")
     
     # Return Parametrized Models
+    print("Models parametrized.")
     return models
-        
 
-# Define Funtion for Making Predictions
-def make_predictions(data, target, test_size):
-    # Time for Prediction
-    start_time = time.time()
-    
-    # Select Features
-    data = select_features(data)
-    
-    # Encode Categorical Variables
-    for col in data.select_dtypes(include=['category']).columns:
-        data[col] = data[col].cat.codes
-    
-    # Create Training and Testing Subsamples
-    split_index = int(len(data) * (1 - test_size))
-    data = data.sample(frac = 1, random_state = 1).reset_index(drop=True)
-    train = data.iloc[:split_index]
-    test = data.iloc[split_index:]
-    
-    X_train, y_train = train.drop(target, axis = 1), train[target]
-    X_test, y_test = test.drop(target, axis = 1), test[target]
-    
-    # Parametrize Models
-    models = parametrize_models(X_train, y_train)
-    
+
+# Define Function for Training, Testing, and Evaluating Models
+def train_test_evaluate(models, train, test, X_train, y_train, X_test, y_test): 
     # Create Empty List to Hold Evaluation Results
     results = []
     
@@ -356,9 +354,13 @@ def make_predictions(data, target, test_size):
     
     # Train, Test, and Evaluate Each Machine Learning Model
     for model_name, model in models.items():
+        # Fit Model
         model.fit(X_train, y_train)
+        
+        # Make Prediction
         y_pred = model.predict(X_test)
         
+        # Calculate Performance
         mae = mean_absolute_error(y_test, y_pred)
         mape = mean_absolute_percentage_error(y_test, y_pred)*100
         
@@ -375,25 +377,32 @@ def make_predictions(data, target, test_size):
         # Plot Predicted vs Actual Prices
         plt.scatter(y_test, y_pred, alpha=0.5)
         plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=2)
-        plt.xlabel('Actual Price ($)')
-        plt.ylabel('Predicted Price ($)')
+        plt.xlabel('Log(Actual Price)')
+        plt.ylabel('Log(Predicted Price)')
         plt.title(f'Predicted vs Actual Prices for {model_name}')
         plt.savefig(filepath + f"output/predicted_actual_{model_name}.png", bbox_inches = "tight")
         plt.show()
         
-    # Test and Evaluate Rule-of-Thumb Model
-    thumb_predictions = test.copy()
-    thumb_predictions['predicted_price'] = thumb_predictions.groupby(['points'])['price'].transform('mean')
+    # Test and Evaluate Naive Model
+    naive_pred = test.copy()
+    naive_pred['predicted_price'] = naive_pred['log_price'].mean()
     
-    mae = mean_absolute_error(y_test, thumb_predictions['predicted_price'])
-    mape = mean_absolute_percentage_error(y_test, thumb_predictions['predicted_price'])*100
+    mae = mean_absolute_error(y_test, naive_pred['predicted_price'])
+    mape = mean_absolute_percentage_error(y_test, naive_pred['predicted_price'])*100
     
     results.append({
-        "Model": "Rule-of-Thumb",
+        "Model": "Naive",
         "MAE": mae,
         "MAPE": mape
     })
-        
+    
+    plt.scatter(y_test, naive_pred['predicted_price'], alpha=0.5)
+    plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=2)
+    plt.xlabel('Log(Actual Price)')
+    plt.ylabel('Log(Predicted Price)')
+    plt.title('Predicted vs Actual Prices for Naive Model')
+    plt.savefig(filepath + "output/predicted_actual_naive.png", bbox_inches = "tight")
+    plt.show()
     
     # Plot Feature Importance by Model
     if feature_importances:
@@ -405,17 +414,36 @@ def make_predictions(data, target, test_size):
             plt.title(f'Feature Importances for {model_name}')
             plt.savefig(filepath + f"output/feature_importance_{model_name}.png", bbox_inches = "tight")
             plt.show()
-            
-    # Save Model Performance
-    with open(filepath + 'output/model_performance.json', 'w') as f:
-        json.dump(results, f, indent = 4)
     
-    # Return Models and Results
+    # Return Results
+    print("Models trained, tested, and evaluated.")
+    return results
+
+
+# Define Function for Making Predictions
+def make_predictions(data):
+    # Begin Timer
+    start_time = time.time()
+    
+    # Select Features
+    data = select_features(data)
+    
+    # Create Training and Testing Sets
+    train, test, X_train, y_train, X_test, y_test = create_train_test_sets(data, target_column = "log_price", test_size = 0.20)
+    
+    # Parametrize Models
+    #models = parametrize_models(X_train, y_train)
+    
+    # Obtain Results
+    results = train_test_evaluate(models, train, test, X_train, y_train, X_test, y_test)
+    
+    # End Timer
     end_time = time.time()
     execution_time = (end_time - start_time)/60
-    print(f"Model parametrization, training, testing, and evaluation was completed in{execution_time: .2f} minutes.")
+    print(f"Feature selection, model parametrization, training, testing, and evaluation were completed in{execution_time: .2f} minutes.")
+    
+    # Return Parametrized Models and Results
     return models, results
 
-
 # Make Predictions
-models, results = make_predictions(df, "price", 0.20)
+models, results = make_predictions(df)
