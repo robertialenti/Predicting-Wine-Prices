@@ -36,15 +36,15 @@ In this section, I visualize some of the data's features to get a better sense o
 
 First, I plot the country of origin. Most of the wines in the dataset were produced in the United States.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/country_distribution.png" width="1000" height="600">
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/country_distribution.png" width="500" height="300">
 
 Next, I plot the distribution of grape variety. Consistent with global production, pinot noir, chardonnay, and cabernet sauvignon are the most common grape varieties. However, a large number of wines are formed from less common blends.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/variety_distribution.png" width="425" height="250">
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/variety_distribution.png" width="500" height="300">
 
 Finally, I plot the distribution of vintage. Most of the wines in the dataset were produceed from grapes harvested around 2010. Given that data was gathered in 2017, most of the wines in the dataset are not young wines - which are consumed within 1-2 years of bottling - but rather wines that have already aged for several years.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/vintage_distribution.png" width="425" height="250">
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/vintage_distribution.png" width="500" height="300">
 
 To get a better sense of how quantitative variables are related with price, I construct a correlation matrix.
 
@@ -74,7 +74,7 @@ The naive model, which makes only unconditional predictions, is found to perform
 
 In addition, I plot actual and predicted log price values for the 6 machine learning models.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/output/predicted_actual_combined.png" width="425" height="250">
+<img src="https://github.com/robertialenti/Wine/raw/main/output/predicted_actual_combined.png" width="500" height="300">
 
 Finally, I examine feature importance for models that produce these statitics.
 
