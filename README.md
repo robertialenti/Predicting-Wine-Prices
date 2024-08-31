@@ -63,7 +63,7 @@ In addition to a naive model, which simply assumes that a wine's price is equal 
 The naive model, which makes only unconditional predictions, is found to perform the worse. In comparison, the gradient-boosted decision trees are found to perform best, recording MAPE of around 30%. That is, these models make predictions that are, on average, 8% away from a wine's actual log(price). XGBoost remains the best performing model if price, rather than log(prce), is used as an outcome. However, the model's MAPE in this case is nearer to 30%.
 
 | Model | MAE | MAPE
-| ---- | ---- | ------------ | -------- | --------- |
+| ---- | ---- | ------------ |
 | Naive | 2018-04-23 17:47 | Métro Vendôme (de Marlowe / de Maisonneuve) |
 | Linear Regression | 2018-04-23 18:00 | Métro Vendôme (de Marlowe / de Maisonneuve) | 
 | Lasso Regression | 2018-04-23 18:03 | Métro Vendôme (de Marlowe / de Maisonneuve) | 
