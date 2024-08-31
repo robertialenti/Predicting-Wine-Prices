@@ -1,5 +1,5 @@
 # Predicting Wine Prices
-This project aims to predict prices for a selection of wines reviewed by sommeliers. I compare the performance of naive and linear regression models to a number of commonly used machine learning techniques including lasso regression, K-nearest neighbors, random forest, and two gradient-boosted decision trees (XGBoost and LightGBM).
+This project aims to predict prices for a selection of wines reviewed by sommeliers. I compare the performance of a naive model to a linear regression model, as well as to a number of commonly used machine learning techniques including lasso regression, K-nearest neighbors, random forest, and two gradient-boosted decision trees (XGBoost and LightGBM).
 
 ## Data
 The data was scraped by [Zach Thoutt](https://github.com/zackthoutt/wine-deep-learning) in 2017 from [Wine Enthusiast](https://www.wineenthusiast.com/?s=&search_type=shop). The raw dataset includes nearly 150,000 reviews. For each wine, we have information about its production, its country and region of origin, a review written written by a professional sommelier, the score assigned to it by Wine Enthusiast, as well as its price in US dollars.
@@ -36,15 +36,15 @@ In this section, I visualize some of the data's features to get a better sense o
 
 First, I plot the country of origin. Most of the wines in the dataset were produced in the United States.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/country_distribution.png" width="425" height="250">
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/country_distribution.png" width="500" height="300">
 
 Next, I plot the distribution of grape variety. Consistent with global production, pinot noir, chardonnay, and cabernet sauvignon are the most common grape varieties. However, a large number of wines are formed from less common blends.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/variety_distribution.png" width="425" height="250">
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/variety_distribution.png" width="500" height="300">
 
 Finally, I plot the distribution of vintage. Most of the wines in the dataset were produceed from grapes harvested around 2010. Given that data was gathered in 2017, most of the wines in the dataset are not young wines - which are consumed within 1-2 years of bottling - but rather wines that have already aged for several years.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/vintage_distribution.png" width="425" height="250">
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/vintage_distribution.png" width="500" height="300">
 
 To get a better sense of how quantitative variables are related with price, I construct a correlation matrix.
 
@@ -60,24 +60,22 @@ I create the training dataset by selecting a random sample of the processed data
 In addition to a naive model, which simply assumes that a wine's price is equal to the average price, I train and use 6 additional models: linear regression, lasso regression, K-nearest neighbors, random forest, and gradient-boosted decision trees (XGBoost and LightGBM). The predictive performance, expressed in terms of mean absolute error (MAE) and mean absolute percentage error (MAPE) is shown below:
 
 
-The naive model, which makes only unconditional predictions, is found to perform the worse. In comparison, the gradient-boosted decision trees are found to perform best. In particular, the XGBoost and LightGBM models are found to record MAPEs of just 7.81% and 8.11%, respectivey. That is, these models make predictions that are, on average, 8% away from a wine's actual log(price). XGBoost remains the best performing model if price, rather than log(price), is used as an outcome. However, the model's MAPE rises to nearly 30% in this case.
+The naive model, which makes only unconditional predictions, is found to perform the worse. In comparison, the gradient-boosted decision trees are found to perform best. In particular, the XGBoost and LightGBM models are found to record MAPEs of just 7.81% and 8.11%, respectivey. That is, these models make predictions that are, on average, 8% away from a wine's actual log(price), which is more than twice as accurate as the naive model. XGBoost remains the best performing model if price, rather than log(price), is used as an outcome. However, the model's MAPE rises to nearly 30% when predicting the untransformed price variable.
 
-| Model | MAE | MAPE (%) |
-| ----- | --- | -------- |
-| Naive | 0.53 | 16.30 |
-| Linear Regression | 0.38 | 11.50 | 
-| Lasso Regression | 0.38 | 11.69 |
-| K-Nearest Neighbors | 0.35 | 10.69 |
-| Random Forest | 0.28 | 8.45 |
-| XGBoost | 0.26 | 7.81 |
-| LightGBM | 0.27 | 8.11 |
+| Model | MAE | MAPE (%) | MAPE, Relative to Naive |
+| ----- | --- | -------- | ----------------------- |
+| Naive | 0.53 | 16.30 | 1 |
+| Linear Regression | 0.38 | 11.50 | 0.71 |
+| Lasso Regression | 0.38 | 11.69 | 0.72 |
+| K-Nearest Neighbors | 0.35 | 10.69 | 0.66 |
+| Random Forest | 0.28 | 8.45 | 0.52 |
+| XGBoost | 0.26 | 7.81 | 0.48 |
+| LightGBM | 0.27 | 8.11 | 0.50 |
 
 In addition, I plot actual and predicted log price values for the 6 machine learning models.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/predicted_actual_combined.png" width="425" height="250">
+<img src="https://github.com/robertialenti/Wine/raw/main/output/predicted_actual_combined.png" width="500" height="300">
 
-Finally, I examine feature importance for models that produce these statitics.
-
-
+Finally, I examine feature importance for models that provide this information. As expected, Wine Enthusiasts' points are generally good predictors of price. A wine's grape country and region of interest, as well as its grape blend are also consistently strong predictors. The sommelier's reviews are comparatively less strong predictors.
 
 Unfortunately, the original dataset does not contain the sommeliers' price assessments. As such, we cannot compare the performance of the models to the experts' best guess.
