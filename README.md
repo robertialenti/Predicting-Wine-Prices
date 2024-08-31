@@ -76,8 +76,6 @@ In addition, I plot actual and predicted log price values for the 6 machine lear
 
 <img src="https://github.com/robertialenti/Wine/raw/main/output/predicted_actual_combined.png" width="800" height="480">
 
-Finally, I examine feature importance for models that produce these statitics.
-
-
+Finally, I examine feature importance for models that provide this information. As expected, Wine Enthusiasts' points are generally good predictors of price. A wine's grape country and region of interest, as well as its grape blend are also consistently strong predictors. The sommelier's reviews are comparatively less strong predictors.
 
 Unfortunately, the original dataset does not contain the sommeliers' price assessments. As such, we cannot compare the performance of the models to the experts' best guess.
