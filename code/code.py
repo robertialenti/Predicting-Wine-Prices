@@ -4,6 +4,7 @@ from tqdm import tqdm
 import pandas as pd
 import numpy as np
 import time
+import os
 import warnings
 
 # Figures
@@ -18,6 +19,7 @@ plt.rcParams["axes.labelsize"] = 18
 plt.rcParams["legend.fontsize"] = 18
 plt.rc("savefig", dpi = 300)
 sns.set_theme(style = "ticks", font_scale = 1, font = "DejaVu Sans")
+from PIL import Image
 
 # Text Analytics
 import nltk
@@ -150,7 +152,7 @@ def find_top_correlated_words(df, text_column, target_column, top_n_words, top_n
 # Usage
 top_words_df, df = find_top_correlated_words(df, 
                                              text_column='description', 
-                                             target_column='log_price', 
+                                             target_column='price', 
                                              top_n_words=100, 
                                              top_n_correlated=10)
 
@@ -289,8 +291,8 @@ def create_train_test_sets(data, target_column, test_size):
     return train, test, X_train, y_train, X_test, y_test
 
 
-# Define Function for Parametrizing Models
-def parametrize_models(X_train, y_train):
+# Define Function for Parameterizing Models
+def parameterize_models(X_train, y_train):
     # Define Parameter Grid
     param_grids = {
         "K-Nearest Neighbors": {
@@ -315,7 +317,7 @@ def parametrize_models(X_train, y_train):
         }
     }
 
-    # Specify Models Not Needing Parametrization
+    # Specify Models Not Needing Parameterization
     models = {
         "Linear Regression": LinearRegression()
     }
@@ -338,15 +340,18 @@ def parametrize_models(X_train, y_train):
         models[model_name] = best_model
         print(f"Best parameters for {model_name}: {grid_search.best_params_}")
     
-    # Return Parametrized Models
-    print("Models parametrized.")
+    # Return Parameterized Models
+    print("Models parameterized.")
     return models
 
 
 # Define Function for Training, Testing, and Evaluating Models
 def train_test_evaluate(models, train, test, X_train, y_train, X_test, y_test): 
-    # Create Empty List to Hold Evaluation Results
+    # Create Empty List to Hold Model Performance Results
     results = []
+    
+    # Create Empty List to Hold Predicted vs. Actual Plots
+    plots = []
     
     # Define Empty Dictionary for Feature Importance
     feature_importances = {}
@@ -379,7 +384,10 @@ def train_test_evaluate(models, train, test, X_train, y_train, X_test, y_test):
         plt.xlabel('Log(Actual Price)')
         plt.ylabel('Log(Predicted Price)')
         plt.title(f'Predicted vs Actual Prices for {model_name}')
-        plt.savefig(filepath + f"output/predicted_actual_{model_name}.png", bbox_inches = "tight")
+        plot_path = filepath + f"output/predicted_actual_{model_name}.png"
+        plt.savefig(plot_path, bbox_inches = "tight")
+        plot = Image.open(plot_path)
+        plots.append(plot)
         plt.show()
         
     # Test and Evaluate Naive Model
@@ -400,7 +408,10 @@ def train_test_evaluate(models, train, test, X_train, y_train, X_test, y_test):
     plt.xlabel('Log(Actual Price)')
     plt.ylabel('Log(Predicted Price)')
     plt.title('Predicted vs Actual Prices for Naive Model')
-    plt.savefig(filepath + "output/predicted_actual_naive.png", bbox_inches = "tight")
+    plot_path = filepath + "output/predicted_actual_naive.png"
+    plt.savefig(plot_path, bbox_inches = "tight")
+    #plot = Image.open(plot_path)
+    #plots.append(plot)
     plt.show()
     
     # Plot Feature Importance by Model
@@ -414,10 +425,40 @@ def train_test_evaluate(models, train, test, X_train, y_train, X_test, y_test):
             plt.savefig(filepath + f"output/feature_importance_{model_name}.png", bbox_inches = "tight")
             plt.show()
     
-    # Return Results
+    # Return Results and Plots
     print("Models trained, tested, and evaluated.")
-    return results
+    return results, plots
 
+
+# Define Function for Combining Predicted vs. Actual Plots
+def combine_plots(plots):
+    num_plots = len(plots)
+    if num_plots != 6:
+        raise ValueError("This function requires exactly 6 plots.")
+
+    # Calculate the dimensions of the combined image
+    max_width = max(plot.size[0] for plot in plots)
+    max_height = max(plot.size[1] for plot in plots)
+    
+    # Two rows, three images per row
+    combined_width = max_width * 3
+    combined_height = max_height * 2
+
+    # Create a new blank image with the combined dimensions
+    combined_plot = Image.new('RGB', (combined_width, combined_height))
+
+    # Paste images into the combined image
+    for i, plot in enumerate(plots):
+        row = i // 3  # 0 for first row, 1 for second row
+        col = i % 3   # 0 for first column, 1 for second column, 2 for third column
+        x_position = col * max_width
+        y_position = row * max_height
+        combined_plot.paste(im=plot, box=(x_position, y_position))
+
+    # Save the combined image
+    save_path = os.path.join(filepath, 'output/predicted_actual_combined.png')
+    combined_plot.save(save_path)
+    
 
 # Define Function for Making Predictions
 def make_predictions(data):
@@ -428,20 +469,32 @@ def make_predictions(data):
     data = select_features(data)
     
     # Create Training and Testing Sets
-    train, test, X_train, y_train, X_test, y_test = create_train_test_sets(data, target_column = "log_price", test_size = 0.20)
+    train, test, X_train, y_train, X_test, y_test = create_train_test_sets(data, 
+                                                                           target_column = "log_price", 
+                                                                           test_size = 0.20)
     
-    # Parametrize Models
-    #models = parametrize_models(X_train, y_train)
+    # Parameterize Models
+    #models = parameterize_models(X_train, 
+    #                             y_train)
     
     # Obtain Results
-    results = train_test_evaluate(models, train, test, X_train, y_train, X_test, y_test)
+    results, plots = train_test_evaluate(models, 
+                                  train, 
+                                  test, 
+                                  X_train, 
+                                  y_train, 
+                                  X_test, 
+                                  y_test)
+    
+    # Combine Predicted vs. Actual Plots
+    combine_plots(plots)
     
     # End Timer
     end_time = time.time()
     execution_time = (end_time - start_time)/60
-    print(f"Feature selection, model parametrization, training, testing, and evaluation were completed in{execution_time: .2f} minutes.")
+    print(f"Feature selection, model parameterization, training, testing, evaluation, and visualization were completed in{execution_time: .2f} minutes.")
     
-    # Return Parametrized Models and Results
+    # Return Parameterized Models and Results
     return models, results
 
 # Make Predictions
