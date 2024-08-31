@@ -74,7 +74,7 @@ The naive model, which makes only unconditional predictions, is found to perform
 
 In addition, I plot actual and predicted log price values for the 6 machine learning models.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/output/predicted_actual_combined.png" width="750" height="450">
+<img src="https://github.com/robertialenti/Wine/raw/main/output/predicted_actual_combined.png" width="500" height="300">
 
 Finally, I examine feature importance for models that provide this information. As expected, Wine Enthusiasts' points are generally good predictors of price. A wine's grape country and region of interest, as well as its grape blend are also consistently strong predictors. The sommelier's reviews are comparatively less strong predictors.
 
