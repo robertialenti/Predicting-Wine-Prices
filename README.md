@@ -21,7 +21,7 @@ In addition, I parse the sommelier reviews to identify technical terms with high
 ### 4. Exploratory Analysis
 In this section, I visualize some of the data's features to get a better sense of how key variables are distributed and related with price.
 
-First, I plot the country of origin. Most of the wines in the dataset were produced in the United States.
+First, I plot the country of origin. Most of the wines in the dataset were produced in the United States, with France and Italy - the world's two largest wine-producing countries - also featuring prominently.
 
 <img src="https://github.com/robertialenti/Wine/raw/main/figures/country_distribution.png" width="600" height="400">
 
@@ -33,7 +33,7 @@ Finally, I plot the distribution of vintage. Most of the wines in the dataset we
 
 <img src="https://github.com/robertialenti/Wine/raw/main/figures/vintage_distribution.png" width="600" height="400">
 
-To get a better sense of how quantitative variables are related with price, I construct a correlation matrix. Unsurprisingly, points and sentiment are positively related with price. Vintage is negatively correlated with price, given that older wines typically fetch higher prices on account of having more complex flavors. Some terms are positively related with price, including "tannins", "bold", "concentrated", and "dark", among others. The term "fruity" is negatively correlated with price, as ___ are typically perceived as being less sophisticated.
+To get a better sense of how quantitative variables are related with price, I construct a correlation matrix. Unsurprisingly, Wine Enthusiast points are the most strongly correlated with price. Sentiment exhibits a weak but positive relationship. Vintage is found to be negatively related with price, given that older wines often have more complex flavors. Some terms are positively related with price, including "tannins", "black", and "oak", among others, owing to the fact that more tannin-rich, darker, and barrel-aged wines are generally preferred by wine connoisseurs. The term "fruity" is negatively correlated with price as wines described in this way are typically perceived as being less sophisticated.
 
 <img src="https://github.com/robertialenti/Wine/raw/main/figures/correlation_matrix.png" width="600" height="450">
 
@@ -68,7 +68,7 @@ I create the training dataset by selecting a random sample of the processed data
 
 In addition to a naive model, which simply assumes that a wine's price is equal to the average price of the testing set, I train and use a linear regression model as well as 5 machine learning models: lasso regression, K-nearest neighbors, random forest, and gradient-boosted decision trees (XGBoost and LightGBM). 
 
-The machine learning models are parameterized by applying K-fold cross valiation, with 5 folds, on a parameter grid. In this way, I am able to optimize key parameters, including the number of neighbors to use when employing K-nearest neighbors or the number of ___ when employing random forests, for example.
+The machine learning models are parameterized by applying K-fold cross valiation, with 5 folds, on a parameter grid. In this way, I am able to optimize key parameters, including the number of neighbors to use when employing K-nearest neighbors or the number of estimators to use when employing random forests, for instance.
 
 Each model's predictive performance, expressed in terms of mean absolute error (MAE) and mean absolute percentage error (MAPE) is shown below:
 
@@ -84,10 +84,8 @@ Each model's predictive performance, expressed in terms of mean absolute error (
 
 The naive model, which makes only unconditional predictions, is found to perform the worst while the gradient-boosted decision trees are found to perform best. In particular, the XGBoost and LightGBM models are found to record MAPEs of 7.81% and 8.11%, respectivey. As such, these models make predictions that are, on average, only 8% away from a wine's actual log(price), making them more than twice as accurate as the naive model. XGBoost remains the best performing model if price, rather than log(price), is used as a target variable. However, the model's MAPE rises to nearly 30% when predicting the untransformed price variable.
 
-In addition, I plot actual and predicted log price values for the 6 machine learning models.
+In addition, I plot actual and predicted log price values for linear regression and the 5 machine learning models.
 
 <img src="https://github.com/robertialenti/Wine/raw/main/output/predicted_actual_combined.png" width="500" height="400">
-
-Finally, I examine feature importance. As expected, Wine Enthusiasts' points are generally good predictors of price. A wine's grape country and region of interest, as well as its grape blend are also consistently strong predictors. The sommelier's reviews are comparatively less strong predictors.
 
 Unfortunately, the sommeliers responsible for providing reviews did not also offer price assessments. As such, we cannot compare the performance of the models to the experts' best guess of a wine's price.
