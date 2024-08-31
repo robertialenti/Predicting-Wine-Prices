@@ -216,37 +216,34 @@ plt.title("Vintage Distribution")
 plt.savefig(filepath + "figures/vintage_distribution.png", bbox_inches = "tight")
 plt.show()
 
-# 4. Relationship Between Price and Points
+# 4. Correlation Matrix
 df_plot = df
-df_plot["vintage"] = df_plot["vintage"].astype(int)
-sns.scatterplot(
-    data=df_plot, 
-    x='points', 
-    y='price', 
-    hue='vintage', 
-    palette='viridis',
-    legend=None
-)
-
-norm = plt.Normalize(df_plot['vintage'].min(), df_plot['vintage'].max())
-sm = plt.cm.ScalarMappable(cmap="viridis", norm=norm)
-plt.xlabel('Points')
-plt.ylabel('Price ($)')
-plt.title('Price vs Points, Colored by Vintage')
-cbar = plt.colorbar(sm)
-cbar.set_label('Vintage', labelpad=10, fontsize=12)
-cbar.ax.set_title('Vintage', pad=15, fontsize=12)
-cbar.ax.yaxis.set_label_position('right')
-cbar.ax.yaxis.set_ticks_position('right')
-cbar.ax.set_ylabel('', rotation=0)
-plt.savefig(filepath + "figures/price_points_vintage.png", bbox_inches = "tight")
-plt.show()
-
-# Correlation Matrix
-df_plot = df
+columns = ['log_price', 'points', 'vintage', 'sentiment']  + \
+          [col for col in df_plot.columns if "contains" in col]
+df_plot = df_plot[columns]
 corr_matrix = df_plot.corr()
-sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
+custom_labels = {
+    'log_price': 'Log(Price)',
+    'points': 'Points',
+    'vintage': 'Vintage',
+    'sentiment': "Sentiment",
+    'contains_year': 'Review contains "Years"',
+    'contains_tannins': 'Review contains "Tannins"',
+    'contains_black': 'Review contains "Black"',
+    'contains_vineyard': 'Review contains "Vineyard"',
+    'contains_licorice': 'Review contains "Licorice"',
+    'contains_dark': 'Review contains "Dark"',
+    'contains_cherry': 'Review contains "Cherry"',
+    'contains_oak': 'Review contains "Oak"',
+    'contains_cabernet': 'Review contains "Cabernet"',
+    'contains_fruity': 'Review contains "Fruity"'
+}
+
+corr_matrix = corr_matrix.loc[columns, columns]
+corr_matrix = corr_matrix.rename(index=custom_labels, columns=custom_labels)
+sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5, annot_kws={"size": 10})
 plt.title('Correlation Matrix')
+plt.savefig(filepath + "figures/correlation_matrix.png", bbox_inches = "tight")
 plt.show()
 
 
