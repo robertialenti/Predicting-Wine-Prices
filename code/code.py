@@ -101,14 +101,14 @@ df = clean_data(df)
     
 #%% Section 4: Text Analysis
 # Define Function for Extracting Sentiment from Reviews
-def get_sentiment_vader(text):
+def get_sentiment(text):
     sentiment_dict = analyzer.polarity_scores(text)
     return sentiment_dict['compound']
 
 
 # Assuming df is your DataFrame with wine reviews
 tqdm.pandas()
-df['sentiment'] = df['description'].progress_apply(get_sentiment_vader)
+df['sentiment'] = df['description'].progress_apply(get_sentiment)
 
 # Define Function for Extracting Terms with Most Predictive Power
 def find_top_correlated_words(df, text_column, target_column, top_n_words, top_n_correlated):
@@ -371,11 +371,11 @@ def train_test_evaluate(models, train, test, X_train, y_train, X_test, y_test):
             "MAPE": mape
             })
         
-        # Collect Feature Importance for Models That Provide Them
+        # Collect Feature Importance for Machine Learning Models
         if hasattr(model, 'feature_importances_'):
             feature_importances[model_name] = model.feature_importances_
             
-        # Plot Predicted vs Actual Prices
+        # Plot Predicted vs. Actual Prices for Machine Learning Models
         plt.scatter(y_test, y_pred, alpha=0.5)
         plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=2)
         plt.xlabel('Log(Actual Price)')
@@ -400,6 +400,7 @@ def train_test_evaluate(models, train, test, X_train, y_train, X_test, y_test):
         "MAPE": mape
     })
     
+    # Plot Predicted vs. Actual Prices for Naive Model
     plt.scatter(y_test, naive_pred['predicted_price'], alpha=0.5)
     plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=2)
     plt.xlabel('Log(Actual Price)')
@@ -407,8 +408,6 @@ def train_test_evaluate(models, train, test, X_train, y_train, X_test, y_test):
     plt.title('Predicted vs Actual Prices for Naive Model')
     plot_path = filepath + "output/predicted_actual_naive.png"
     plt.savefig(plot_path, bbox_inches = "tight")
-    #plot = Image.open(plot_path)
-    #plots.append(plot)
     plt.show()
     
     # Plot Feature Importance by Model
