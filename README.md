@@ -33,7 +33,13 @@ I evaluate the sentiment of each description using a transformer, which is a dee
 ### 4. Exploratory Analysis
 Before proceeding to making predictions, I visualize some of the data's features to get a better sense of how variables are distributed and related.
 
+First, I plot the country of origin. Most of the wines in the dataset were produced in the United States.
+
 <img src="https://github.com/robertialenti/Wine/raw/main/figures/country_distribution.png" width="425" height="250">
+
+Next, we plot the distribution of grape variety.
+
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/variety_distribution.png" width="425" height="250">
 
 ### 5. Prediction
 In this section, I select relevant features, parametrize the machine learning models with k-fold cross-validation, make out-of-sample predictions, and compare performance in comparison to a naive rule-of-thumb model.
