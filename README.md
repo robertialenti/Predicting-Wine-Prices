@@ -48,7 +48,7 @@ Finally, I plot the distribution of vintage. Most of the wines in the dataset we
 
 To get a better sense of how quantitative variables are related with price, I construct a correlation matrix.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/figures/correlation_matrix.png" width="500" height="400">
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/correlation_matrix.png" width="600" height="450">
 
 I find that wine price to be left-skewed, with most wines having prices clustered around the mean and relatively fewer wines having much higher prices. As a result, I choose to apply a logarithmic transform, which helps make the distribution of price more normal. I use the logged price as the target variable in prediction.
 
