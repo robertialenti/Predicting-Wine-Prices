@@ -46,14 +46,14 @@ Finally, I plot the distribution of vintage. Most of the wines in the dataset we
 
 <img src="https://github.com/robertialenti/Wine/raw/main/figures/vintage_distribution.png" width="425" height="250">
 
-Given that 
+To get a better sense of how quantitative variables are related with price, I construct a correlation matrix.
 
 I find that wine price to be left-skewed, with most wines having prices clustered around the mean and relatively fewer wines having much higher prices. As a result, I choose to apply a logarithmic transform, which helps make the distribution of price more normal. I use the logged price as the target variable in prediction.
 
 ### 5. Prediction
 In this section, I select relevant features, create training and testing sets, parametrize the machine learning models with k-fold cross-validation, make out-of-sample predictions, and compare performance to a naive model.
 
-The features selected include all of the numerical variables, namely ___, as well as categorical variables including ____.
+The features selected include all of the numerical variables, namely ___, as well as categorical variables, including ___.
 
 I create the training dataset by selecting a random sample of the processed dataset with 80% of the processed dataset's observation. The testing dataset comprises the complimentary 20% of wines.
 
@@ -73,5 +73,11 @@ The naive model, which makes only unconditional predictions, is found to perform
 | LightGBM | 0.27 | 8.11 |
 
 In addition, I plot actual and predicted log price values for the 6 machine learning models.
+
+<img src="https://github.com/robertialenti/Wine/raw/main/figures/predicted_actual_combined.png" width="425" height="250">
+
+Finally, I examine feature importance for models that produce these statitics.
+
+
 
 Unfortunately, the original dataset does not contain the sommeliers' price assessments. As such, we cannot compare the performance of the models to the experts' best guess.
