@@ -350,9 +350,6 @@ def train_test_evaluate(models, train, test, X_train, y_train, X_test, y_test):
     # Create Empty List to Hold Predicted vs. Actual Plots
     plots = []
     
-    # Define Empty Dictionary for Feature Importance
-    feature_importances = {}
-    
     # Train, Test, and Evaluate Each Machine Learning Model
     for model_name, model in models.items():
         # Fit Model
@@ -370,10 +367,6 @@ def train_test_evaluate(models, train, test, X_train, y_train, X_test, y_test):
             "MAE": mae, 
             "MAPE": mape
             })
-        
-        # Collect Feature Importance for Machine Learning Models
-        if hasattr(model, 'feature_importances_'):
-            feature_importances[model_name] = model.feature_importances_
             
         # Plot Predicted vs. Actual Prices for Machine Learning Models
         plt.scatter(y_test, y_pred, alpha=0.5)
@@ -409,17 +402,6 @@ def train_test_evaluate(models, train, test, X_train, y_train, X_test, y_test):
     plot_path = filepath + "output/predicted_actual_naive.png"
     plt.savefig(plot_path, bbox_inches = "tight")
     plt.show()
-    
-    # Plot Feature Importance by Model
-    if feature_importances:
-        for model_name, importances in feature_importances.items():
-            sorted_idx = importances.argsort()
-            plt.barh(X_train.columns[sorted_idx], importances[sorted_idx])
-            plt.xlabel('Importance')
-            plt.ylabel('Feature')
-            plt.title(f'Feature Importances for {model_name}')
-            plt.savefig(filepath + f"output/feature_importance_{model_name}.png", bbox_inches = "tight")
-            plt.show()
     
     # Return Results and Plots
     print("Models trained, tested, and evaluated.")
