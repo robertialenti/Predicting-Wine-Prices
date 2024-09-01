@@ -246,8 +246,6 @@ plt.title('Correlation Matrix')
 plt.savefig(filepath + "figures/correlation_matrix.png", bbox_inches = "tight")
 plt.show()
 
-stop
-
 
 #%% Section 5: Make and Evaluate Predictions
 # Define Function for Selecting Relevant Features
