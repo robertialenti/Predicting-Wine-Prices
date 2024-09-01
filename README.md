@@ -33,7 +33,7 @@ Finally, I plot the distribution of vintage. Most of the wines in the dataset we
 
 <img src="https://github.com/robertialenti/Wine/raw/main/figures/vintage_distribution.png" width="600" height="400">
 
-To get a better sense of how quantitative variables are related with price, I construct a correlation matrix. Unsurprisingly, Wine Enthusiast points are the most strongly correlated with price. Sentiment exhibits a weak but positive relationship. Vintage is found to be negatively related with price, given that older wines often have more complex flavors. Some terms are positively related with price, including "tannins", "black", and "oak", among others, owing to the fact that more tannin-rich, darker, and barrel-aged wines are generally preferred by wine connoisseurs. The term "fruity" is negatively correlated with price as wines described in this way are typically perceived as being less sophisticated.
+To get a better sense of how quantitative variables are related with price, I construct a correlation matrix. Unsurprisingly, Wine Enthusiast points are the most strongly correlated with price. Sentiment exhibits a weak but positive relationship. Vintage is found to be negatively related with price, given that older wines often have more complex flavors. Some terms are positively related with price, including "tannins", "concentrated", and "rich", among others, owing to the fact that more tannin-rich and full-bodied wines are generally preferred by wine connoisseurs. The term "fruity" is negatively correlated with price as wines described in this way are typically perceived as being less sophisticated.
 
 <img src="https://github.com/robertialenti/Wine/raw/main/figures/correlation_matrix.png" width="600" height="450">
 
