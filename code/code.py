@@ -227,16 +227,16 @@ custom_labels = {
     'points': 'Points',
     'vintage': 'Vintage',
     'sentiment': "Sentiment",
-    'contains_year': 'Review contains "Years"',
+    'contains_years': 'Review contains "Years"',
     'contains_tannins': 'Review contains "Tannins"',
     'contains_black': 'Review contains "Black"',
-    'contains_vineyard': 'Review contains "Vineyard"',
-    'contains_licorice': 'Review contains "Licorice"',
+    'contains_age': 'Review contains "Age"',
     'contains_dark': 'Review contains "Dark"',
-    'contains_cherry': 'Review contains "Cherry"',
-    'contains_oak': 'Review contains "Oak"',
+    'contains_licorice': 'Review contains "Licorice"',
+    'contains_concentrated': 'Review contains "Concentrated"',
+    'contains_vineyard': 'Review contains "Vineyard"',
     'contains_cabernet': 'Review contains "Cabernet"',
-    'contains_fruity': 'Review contains "Fruity"'
+    'contains_rich': 'Review contains "Rich"'
 }
 
 corr_matrix = corr_matrix.loc[columns, columns]
@@ -245,6 +245,8 @@ sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5,
 plt.title('Correlation Matrix')
 plt.savefig(filepath + "figures/correlation_matrix.png", bbox_inches = "tight")
 plt.show()
+
+stop
 
 
 #%% Section 5: Make and Evaluate Predictions
