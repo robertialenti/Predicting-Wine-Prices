@@ -53,16 +53,16 @@ I select all of the following features:
 - winery: The wine's producer. 
 - designation: The vineyard within the winery where the grapes that made the wine are from
 - vintage: The vintage of the wine, ranging from 1990 to 2016.
-- snetiment: Sentiment of the sommelier's review, as calculated with Vader, ranging from -1 to 1.
+- sentiment: Sentiment of the sommelier's review, as calculated with Vader, ranging from -1 to 1.
 - contains_tannins: Indicator variable equal to 1 if a sommelier review incudes the term "tannins", and 0 otherwise.
 - contains_black: Indicator variable equal to 1 if a sommelier review incudes the term "black", and 0 otherwise.
-- contains_vineyard: Indicator variable equal to 1 if a sommelier review incudes the term "vineyard", and 0 otherwise.
-- contains_licorice: Indicator variable equal to 1 if a sommelier review incudes the term "licorice", and 0 otherwise.
+- contains_age: Indicator variable equal to 1 if a sommelier review incudes the term "age", and 0 otherwise.
 - contains_dark: Indicator variable equal to 1 if a sommelier review incudes the term "dark", and 0 otherwise.
-- contains_cherry: Indicator variable equal to 1 if a sommelier review incudes the term "cherry", and 0 otherwise.
-- contains_oak: Indicator variable equal to 1 if a sommelier review incudes the term "oak", and 0 otherwise.
+- contains_licorice: Indicator variable equal to 1 if a sommelier review incudes the term "licorice", and 0 otherwise.
+- contains_concentrated: Indicator variable equal to 1 if a sommelier review incudes the term "concentrated", and 0 otherwise.
+- contains_vineyard: Indicator variable equal to 1 if a sommelier review incudes the term "vineyard", and 0 otherwise.
 - contains_cabernet: Indicator variable equal to 1 if a sommelier review incudes the term "cabernet", and 0 otherwise.
-- contains_fruity: Indicator variable equal to 1 if a sommelier review incudes the term "fruity", and 0 otherwise.
+- contains_rich: Indicator variable equal to 1 if a sommelier review incudes the term "rich", and 0 otherwise.
 
 I create the training dataset by selecting a random sample of the processed dataset, which includes 80% of observations. The testing dataset comprises the complimentary 20% of wines.
 
