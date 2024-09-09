@@ -86,6 +86,6 @@ The naive model, which makes only unconditional predictions, is found to perform
 
 In addition, I plot actual and predicted log price values for linear regression and the 5 machine learning models.
 
-<img src="https://github.com/robertialenti/Wine/raw/main/output/predicted_actual_combined.png" width="500" height="400">
+<img src="https://github.com/robertialenti/Wine/raw/main/output/predicted_actual_combined.png">
 
 Unfortunately, the sommeliers responsible for providing reviews did not also offer price assessments. As such, we cannot compare the performance of the models to the experts' best guess of a wine's price.
