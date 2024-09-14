@@ -82,10 +82,10 @@ Each model's predictive performance, expressed in terms of mean absolute error (
 | XGBoost | 0.26 | 7.81 | 0.48 |
 | LightGBM | 0.27 | 8.11 | 0.50 |
 
-The naive model, which makes only unconditional predictions, is found to perform the worst while the gradient-boosted decision trees are found to perform best. In particular, the XGBoost and LightGBM models are found to record MAPEs of 7.81% and 8.11%, respectivey. As such, these models make predictions that are, on average, only 8% away from a wine's actual log(price), making them more than twice as accurate as the naive model. XGBoost remains the best performing model if price, rather than log(price), is used as a target variable. However, the model's MAPE rises to nearly 30% when predicting the untransformed price variable.
+The naive model, which makes only unconditional predictions, is naturally found to perform the worst while the gradient-boosted decision trees are found to perform best. In particular, the XGBoost and LightGBM models are found to record MAPEs of 7.81% and 8.11%, respectivey. As such, these models make predictions that are, on average, only 8% away from a wine's actual log(price), making them more than twice as accurate as the naive model. XGBoost remains the best performing model if price, rather than log(price), is used as a target variable. However, the model's MAPE rises to nearly 30% when predicting the untransformed price variable.
 
 In addition, I plot actual and predicted log price values for linear regression and the 5 machine learning models.
 
 <img src="https://github.com/robertialenti/Wine/raw/main/output/predicted_actual_combined.png">
 
-Unfortunately, the sommeliers responsible for providing reviews did not also offer price assessments. As such, we cannot compare the performance of the models to the experts' best guess of a wine's price.
+Unfortunately, the sommeliers responsible for providing reviews did not also offer their own price assessments. As such, we cannot compare the performance of the models to the experts' best guess of a wine's price.
