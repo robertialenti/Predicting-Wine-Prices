@@ -79,8 +79,8 @@ Each model's predictive performance, expressed in terms of mean absolute error (
 | Lasso Regression | 0.38 | 11.69 | 0.72 |
 | K-Nearest Neighbors | 0.35 | 10.69 | 0.66 |
 | Random Forest | 0.28 | 8.45 | 0.52 |
-| XGBoost | 0.26 | 7.81 | 0.48 |
 | LightGBM | 0.27 | 8.11 | 0.50 |
+| XGBoost | 0.26 | 7.81 | 0.48 |
 
 The naive model, which makes only unconditional predictions, is naturally found to perform the worst while the gradient-boosted decision trees are found to perform best. In particular, the XGBoost and LightGBM models are found to record MAPEs of 7.81% and 8.11%, respectivey. As such, these models make predictions that are, on average, only 8% away from a wine's actual log(price), making them more than twice as accurate as the naive model. XGBoost remains the best performing model if price, rather than log(price), is used as a target variable. However, the model's MAPE rises to nearly 30% when predicting the untransformed price variable.
 
